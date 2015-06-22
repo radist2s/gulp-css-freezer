@@ -1,0 +1,28 @@
+{
+  "name": "gulp-css-freezer",
+  "version": "0.0.1",
+  "description": "CSS cache invalidation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:radist2s/gulp-css-freezer.git"
+  },
+  "keywords": [
+    "gulp",
+    "css",
+    "cache",
+    "invalidation"
+  ],
+  "dependencies": {
+    "gulp-util": "^3",
+    "through2": "^0.6"
+  },
+  "author": "Alex Batalov",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.9.0"
+  }
+}

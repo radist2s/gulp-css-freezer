@@ -1,0 +1,30 @@
+.img-01 {
+    background: red url("../img/img-01.jpg") no-repeat center bottom;
+}
+
+.img-01-clone {
+    background: red url(../img/img-01-clone.jpg);
+}
+
+.img-02 {
+    background: red url('../img/img-02.jpg');
+}
+
+.data-uri-url {
+    background-image: url(data:text;base64,LmRhdGEtdXJpLXVybA==);
+}
+
+.data-external-protocols {
+    background-image: url('http://xmp.com/http-img.gif');
+    background: url('https://xmp.com/https-img.gif');
+    background: url("//xmp.com/no-protocol-img.gif");
+}
+@font-face {
+    font-family: PTSans;
+    src: url('../fonts/pt-sans-regular.eot');
+    src: url('../fonts/pt-sans-regular.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/pt-sans-regular.woff') format('woff'),
+        url('../fonts/pt-sans-regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
