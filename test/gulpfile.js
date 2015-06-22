@@ -8,16 +8,7 @@ gulp.task('test', function () {
             freezeMapBaseDir: './fixtures/css',
             freezeNestingLevel: 0
         }))
-        .pipe(gulp.dest('./dest').on('end', function () {
-            console.log('DEST END')
-        }))
-        .pipe(gulpCSSUrlRep.freezeMapResolve())
         .pipe(gulp.dest('./dest'))
-})
-
-gulp.task('list', function () {
-    return gulp
-        .src(path.join(__dirname, 'fixtures/css/*.css'))
-        .pipe(require('gulp-filelist')('filelist.json'))
+        .pipe(gulpCSSUrlRep.freezeMapResolve())
         .pipe(gulp.dest('./dest'))
 })

@@ -1,13 +1,10 @@
 var util = require('util')
 var gutil = require('gulp-util')
-var through2 = require('through2')
 var through = require('through')
 var fs = require('fs')
 var path = require('path')
 var crypto = require('crypto')
 var cssUrlReplacer = require('./lib/css-url-replace')
-
-var streamLib = require('stream')
 
 const PLUGIN_NAME = 'gulp-css-freezer'
 

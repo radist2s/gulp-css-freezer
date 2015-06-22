@@ -14,11 +14,12 @@
     "gulp",
     "css",
     "cache",
-    "invalidation"
+    "invalidation",
+    "freeze"
   ],
   "dependencies": {
     "gulp-util": "^3",
-    "through2": "^0.6"
+    "through": "^2.3"
   },
   "author": "Alex Batalov",
   "license": "MIT",
