@@ -1,6 +1,7 @@
 var util = require('util')
 var gutil = require('gulp-util')
-var through = require('through2')
+var through2 = require('through2')
+var through = require('through')
 var fs = require('fs')
 var path = require('path')
 var crypto = require('crypto')
@@ -21,11 +22,20 @@ function CssFreezer(options) {
 }
 
 CssFreezer.prototype.stream = function () {
-    var stream = this.createStream(this.pipeMainTransform)
+    var self = this
+
+    var stream = this.createStream(this.pipeMainTransform, function () {
+        this.queue(self.freezeMapFile)
+        this.queue(null)
+    })
 
     if (this.config.freeze) {
         stream.pipe(
-            this.createStream(this.pipeFreezedFilesCollectorTransform)
+            this.createStream(this.pipeFreezedFilesCollectorTransform, function () {
+                self.freezeMapFile.contents.emit('startFlush')
+
+                this.queue(null)
+            })
         )
     }
 
@@ -37,47 +47,52 @@ CssFreezer.prototype.config = {
     urlFilter: null,
     prependUrlFilter: false,
     freeze: true,
-    freezeNestingLevel: 2,
+    freezeNestingLevel: 1,
     freezeMapFileName: 'css-freeze-map.json',
-    freezeMapBaseDir: null,
-    cssBasePath: '.'
+    freezeMapBaseDir: null
 }
 
-CssFreezer.prototype.createStream = function (transformCallback) {
+CssFreezer.prototype.createStream = function (transformCallback, endCallback) {
     var _this = this
 
-    return through.obj(function () {
+    return through(function (sourceFile, enc, cb) {
         var stream = this
 
         transformCallback.bind(_this, stream).apply(_this, arguments)
-    })
+    }, endCallback)
 }
 
-CssFreezer.prototype.pipeMainTransform = function pipeMainTransform(stream, sourceFile, enc, cb) {
+CssFreezer.prototype.pipeMainTransform = function pipeMainTransform(stream, sourceFile) {
     if (sourceFile.isNull()) {
-        return cb(null, sourceFile)
+        return stream.emit('data', sourceFile)
     }
 
     if (sourceFile.isStream()) {
-        return cb(new gutil.PluginError(PLUGIN_NAME, 'Streaming not supported'));
+        return stream.emit('error', new gutil.PluginError(PLUGIN_NAME, 'Streaming not supported'))
     }
 
-    var destFile
-
     try {
+        var destFile
+
         if (this.config.freeze) {
-            // Create Freeze Map Stream Source
-            this.freezeMapFileSource = new FreezeMapFileSource()
+            if (!this.freezeMapFile) {
+                // Create Freeze Map Stream Source
+                this.freezeMapFileSource = new FreezeMapFileSource()
 
-            // Waite for gulp.dest() to get destination path
-            this.freezeMapFileSource.transform.on('finish', this.resolveFreezedMapLinks.bind(this))
+                // Waite for gulp.dest() to get destination path
+                this.freezeMapFileSource.transform.on('beforeFlush', function (freezeMap) {
+                    var relativeFreezeMap = this.resolveFreezedMapLinks(freezeMap)
 
-            stream.push(this.freezeMapFile = new gutil.File({
-                path: 'freeze.json',
-                base: '',
-                cwd: '',
-                contents: this.freezeMapFileSource.transform
-            }))
+                    this.freezeMapFileSource.transform.emit('completeFlush', relativeFreezeMap)
+                }.bind(this))
+
+                this.freezeMapFile = new gutil.File({
+                    path: this.config.freezeMapFileName,
+                    base: '',
+                    cwd: '',
+                    contents: this.freezeMapFileSource.transform
+                })
+            }
 
             // Find and freeze resources
             var css = cssUrlReplacer.replace(sourceFile.contents, this.freezeLinks.bind(this, sourceFile, stream), ['//'])
@@ -106,11 +121,9 @@ CssFreezer.prototype.pipeMainTransform = function pipeMainTransform(stream, sour
     catch (err) {
         stream.emit('error', new gutil.PluginError(PLUGIN_NAME, err))
     }
-
-    cb()
 }
 
-CssFreezer.prototype.freezeLinks = function freezeLinks(cssFile, pipe, url) {
+CssFreezer.prototype.freezeLinks = function freezeLinks(cssFile, stream, url) {
     if (cssUrlReplacer.isExternalUrl(url)) {
         return url
     }
@@ -132,39 +145,41 @@ CssFreezer.prototype.freezeLinks = function freezeLinks(cssFile, pipe, url) {
     file.path = filePath
     file.sourcePath = fileSourcePath
 
-    pipe.push(file)
+    stream.push(file)
 
     return filePath + urlData.query
 }
 
-CssFreezer.prototype.pipeFreezedFilesCollectorTransform = function pipeFreezedFilesCollectorTransform(stream, sourceFile, enc, cb) {
+CssFreezer.prototype.pipeFreezedFilesCollectorTransform = function pipeFreezedFilesCollectorTransform(stream, sourceFile) {
     if (sourceFile.sourcePath) {
         this.freezeMapFileSource.push(sourceFile.sourcePath, sourceFile.path)
     }
-
-    cb()
 }
 
-CssFreezer.prototype.resolveFreezedMapLinks = function () {
+CssFreezer.prototype.resolveFreezedMapLinks = function (freezeMap) {
     if (!this.config.freezeMapBaseDir) {
         return
     }
 
+    var freezeMapFile = this.freezeMapFile
+
+    console.log(freezeMapFile.path)
+
     var freezeMapBaseDir = this.config.freezeMapBaseDir,
-        destinationBaseDir = path.dirname(this.freezeMapFile.path),
-        freezeMap = this.freezeMapFileSource.read(true),
+        destinationBaseDir = path.dirname(freezeMapFile.path),
         relativeFreezeMap = Object.create(null)
 
     Object.keys(freezeMap).forEach(function (sourcePath) {
         var freezedPath = freezeMap[sourcePath]
 
         sourcePath = path.relative(freezeMapBaseDir, sourcePath)
+        console.log(path.join(destinationBaseDir, freezedPath))
         freezedPath = path.relative(freezeMapBaseDir, path.join(destinationBaseDir, freezedPath))
 
         relativeFreezeMap[sourcePath] = freezedPath
     }.bind(this))
 
-    this.freezeMapFile.contents = new Buffer(JSON.stringify(relativeFreezeMap, null, 2))
+    return relativeFreezeMap
 }
 
 CssFreezer.prototype.resolveFreezedLinks = function resolveFreezedLinks(cssFilePath, url) {
@@ -240,11 +255,23 @@ function FreezeMapFileSource() {
         this.push(null)
     }
 
-    // Usually flushed data not uses, file.contents replaced by Buffer
-    // in CssFreezer.prototype.resolveFreezedMapLinks on gulp.dest()
+    // Flush executes gulp.dest()
     transform._flush = function (done) {
-        this.push(self.read())
-        done()
+        var freezeMap = self.read(true)
+
+        this.once('startFlush', function () {
+            console.log("FLUSH START")
+
+            this.emit('beforeFlush', freezeMap)
+        })
+
+        this.once('completeFlush', function (freezePath) {
+            console.log("FLUSH COMPLETE")
+
+            this.push(JSON.stringify(freezePath, null, 1))
+
+            done()
+        })
     }
 
     this.readable.pipe(transform)
@@ -260,7 +287,7 @@ FreezeMapFileSource.prototype.read = function (returnObject) {
     return returnObject ? this.freezeMap : JSON.stringify(this.freezeMap, null, 2)
 }
 
-module.exports = function (options) {
+module.exports = function gulpCssFreezer(options) {
     var cssFreezer = new CssFreezer(options)
 
     return cssFreezer.stream()
