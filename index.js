@@ -160,19 +160,21 @@ CssFreezer.prototype.resolveFreezeMap = function (freezeMap, destinationBaseDir,
     var freezeMapBaseDir = this.config.freezeMapBaseDir,
         relativeFreezeMap = Object.create(null)
 
-    Object.keys(freezeMap).forEach(function (sourcePath) {
-        var freezedPath = freezeMap[sourcePath]
+    if (freezeMap) {
+        Object.keys(freezeMap).forEach(function (sourcePath) {
+            var freezedPath = freezeMap[sourcePath]
 
-        if (util.isNullOrUndefined(noResolveSourcePath)) {
-            sourcePath = path.relative(freezeMapBaseDir, sourcePath)
-        }
+            if (util.isNullOrUndefined(noResolveSourcePath)) {
+                sourcePath = path.relative(freezeMapBaseDir, sourcePath)
+            }
 
-        if (!util.isNullOrUndefined(destinationBaseDir)) {
-            freezedPath = path.relative(freezeMapBaseDir, path.join(destinationBaseDir, freezedPath))
-        }
+            if (!util.isNullOrUndefined(destinationBaseDir)) {
+                freezedPath = path.relative(freezeMapBaseDir, path.join(destinationBaseDir, freezedPath))
+            }
 
-        relativeFreezeMap[sourcePath] = freezedPath
-    }.bind(this))
+            relativeFreezeMap[sourcePath] = freezedPath
+        }.bind(this))
+    }
 
     return relativeFreezeMap
 }
@@ -258,8 +260,9 @@ gulpCssFreezer.freezeMapResolve = function () {
             freezeMapFile = sourceFile
             cssFreezer = sourceFile.freezerInstance
 
-            var freezeMap = JSON.parse(sourceFile.contents.toString('utf-8')),
-                destinationBaseDir = path.dirname(sourceFile.path)
+            var freezeMap = sourceFile.contents ? JSON.parse(sourceFile.contents.toString('utf-8')) : null
+
+            var destinationBaseDir = path.dirname(sourceFile.path)
 
             var resolvedFreezeMap = cssFreezer.resolveFreezeMap(freezeMap, destinationBaseDir, true)
 
