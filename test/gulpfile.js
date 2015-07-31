@@ -5,6 +5,7 @@ var gulpCSSFreeze = require('./../index')
 gulp.task('test', function () {
     return gulp.src(path.join(__dirname, 'fixtures/css/*.css'))
         .pipe(gulpCSSFreeze({
+            freeze: false,
             freezeMapBaseDir: './fixtures/css',
             freezeNestingLevel: 0
         }))

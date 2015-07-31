@@ -21,17 +21,15 @@ function CssFreezer(options) {
         throw new gutil.PluginError(PLUGIN_NAME, '`callback` required')
     }
 
-    if (this.config.freeze) {
-        this.freezeMap = Object.create(null)
+    this.freezeMap = Object.create(null)
 
-        this.freezeMapFile = new gutil.File({
-            path: this.config.freezeMapFileName,
-            base: '',
-            cwd: ''
-        })
+    this.freezeMapFile = new gutil.File({
+        path: this.config.freezeMapFileName,
+        base: '',
+        cwd: ''
+    })
 
-        this.freezeMapFile.freezerInstance = this
-    }
+    this.freezeMapFile.freezerInstance = this
 }
 
 CssFreezer.prototype.stream = function () {
@@ -42,26 +40,20 @@ CssFreezer.prototype.stream = function () {
         this.queue(null)
     })
 
-    if (this.config.freeze) {
-        stream.pipe(
-            this.createStream(this.pipeFreezedFilesCollectorTransform, function () {
-                var reslovedFreezeMap = self.resolveFreezeMap(self.freezeMap)
+    stream.pipe(
+        this.createStream(this.pipeFreezedFilesCollectorTransform, function () {
+            var reslovedFreezeMap = self.resolveFreezeMap(self.freezeMap)
 
-                self.freezeMapFile.contents = toJSONBuffer(reslovedFreezeMap)
+            self.freezeMapFile.contents = toJSONBuffer(reslovedFreezeMap)
 
-                this.queue(null)
-            })
-        )
-    }
+            this.queue(null)
+        })
+    )
 
     return stream
 }
 
 CssFreezer.prototype.config = {
-    includeProtocols: [],
-    urlFilter: null,
-    prependUrlFilter: false,
-    freeze: true,
     freezeNestingLevel: 1,
     freezeMapFileName: 'css-freeze-map.json',
     freezeMapBaseDir: null
@@ -89,28 +81,23 @@ CssFreezer.prototype.pipeMainTransform = function pipeMainTransform(stream, sour
     try {
         var destFile
 
-        if (this.config.freeze) {
-            // Find and freeze resources
-            var css = cssUrlReplacer.replace(sourceFile.contents, this.freezeLinks.bind(this, sourceFile, stream), ['//'])
+        // Find and freeze resources
+        var css = cssUrlReplacer.replace(sourceFile.contents, this.freezeLinks.bind(this, sourceFile, stream), ['//'])
 
-            // Create Css freeze path
-            var cssFilePath = this.createFileSubDirPath(this.createFileName(sourceFile))
+        // Create Css freeze path
+        var cssFilePath = this.createFileSubDirPath(this.createFileName(sourceFile))
 
-            // Resolve freezed links in Css
-            css = cssUrlReplacer.replace(css, this.resolveFreezedLinks.bind(this, cssFilePath))
+        // Resolve freezed links in Css
+        css = cssUrlReplacer.replace(css, this.resolveFreezedLinks.bind(this, cssFilePath))
 
-            destFile = new gutil.File({
-                path: cssFilePath,
-                base: '',
-                cwd: '',
-                contents: new Buffer(css)
-            })
+        destFile = new gutil.File({
+            path: cssFilePath,
+            base: '',
+            cwd: '',
+            contents: new Buffer(css)
+        })
 
-            destFile.sourcePath = sourceFile.path
-        }
-        else {
-            destFile = sourceFile
-        }
+        destFile.sourcePath = sourceFile.path
 
         stream.push(destFile)
     }
@@ -154,7 +141,7 @@ CssFreezer.prototype.pipeFreezedFilesCollectorTransform = function pipeFreezedFi
 
 CssFreezer.prototype.resolveFreezeMap = function (freezeMap, destinationBaseDir, noResolveSourcePath) {
     if (!this.config.freezeMapBaseDir) {
-        return
+        return freezeMap
     }
 
     var freezeMapBaseDir = this.config.freezeMapBaseDir,
