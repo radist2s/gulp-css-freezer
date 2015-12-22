@@ -107,7 +107,7 @@ gulp.task('freezer-css', function () {
     return gulp.src('../static/css/*.css')
         .pipe(gulpCssFreezer({freezeMapBaseDir: '../'})) // finds all resources inside css and freeze it
         .pipe(gulp.dest(deployPath)) // writes freezed resources
-        .pipe(gulpCssFreezer.freezeMapResolve()) // creates map off freezed resources
+        .pipe(gulpCssFreezer.freezeMapResolve()) // creates map of freezed resources
         .pipe(gulp.dest(deployPath)) // writes freeze map file
 })
 

@@ -147,6 +147,8 @@ CssFreezer.prototype.resolveFreezeMap = function (freezeMap, destinationBaseDir,
     var freezeMapBaseDir = this.config.freezeMapBaseDir,
         relativeFreezeMap = Object.create(null)
 
+    var separatorRegexp = new RegExp(path.sep, 'g')
+
     if (freezeMap) {
         Object.keys(freezeMap).forEach(function (sourcePath) {
             var freezedPath = freezeMap[sourcePath]
@@ -159,7 +161,8 @@ CssFreezer.prototype.resolveFreezeMap = function (freezeMap, destinationBaseDir,
                 freezedPath = path.relative(freezeMapBaseDir, path.join(destinationBaseDir, freezedPath))
             }
 
-            relativeFreezeMap[sourcePath] = freezedPath
+            // replace any OS path separator with slash(/)
+            relativeFreezeMap[sourcePath] = freezedPath.replace(separatorRegexp, '/')
         }.bind(this))
     }
 
