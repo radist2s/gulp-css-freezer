@@ -23,7 +23,8 @@
   ],
   "dependencies": {
     "gulp-util": ">=3",
-    "through": "^2.3"
+    "external-protocol-tester": "^0.0.1",
+    "static-resources-freezer": "^0.0.1"
   },
   "author": "Alex Batalov",
   "license": "MIT",

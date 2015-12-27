@@ -76,7 +76,7 @@
 
 ###### Freezing map file
 
-```css
+```json
 {
     "../img/img-01.jpg": "../../dest/356a192b7913b04c54574d18c28d46e6395428ab.jpg",
     "../img/img-01-clone.jpg": "../../dest/356a192b7913b04c54574d18c28d46e6395428ab.jpg",
@@ -126,7 +126,7 @@ gulp.task('freezer-css', function () {
             freezeMapBaseDir: '../static/css', // resolve paths inside map file name by freezeMapBaseDir.
                                                // default null (writes absolute path of freezed file)
             freezeNestingLevel: 3, // nesting levels of directories; default 1
-            freezeMapFileName: 'freeze-map.json' // freeze map file name; default css-freeze-map.json
+            freezeMapFileName: 'css-freeze-map.json' // freeze map file name; default css-freeze-map.json
         }))
         .pipe(gulp.dest(deployPath))
         .pipe(gulpCssFreezer.freezeMapResolve())
