@@ -103,7 +103,7 @@ var gulpCssFreezer = require('gulp-css-freezer');
 
 var deployPath = '../_deploy'
 
-gulp.task('freezer-css', function () {
+gulp.task('freezee-css', function () {
     return gulp.src('../static/css/*.css')
         .pipe(gulpCssFreezer({freezeMapBaseDir: '../'})) // finds all resources inside css and freeze it
         .pipe(gulp.dest(deployPath)) // writes freezed resources
@@ -120,7 +120,7 @@ var gulpCssFreezer = require('gulp-css-freezer');
 
 var deployPath = '../_deploy'
 
-gulp.task('freezer-css', function () {
+gulp.task('freezee-css', function () {
     return gulp.src('../static/css/*.css')
         .pipe(gulpCssFreezer({
             freezeMapBaseDir: '../static/css', // resolve paths inside map file name by freezeMapBaseDir.
