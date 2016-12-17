@@ -25,7 +25,7 @@ function pipeMainTransform(resourceFreezer, stream, sourceFile) {
         var cssFilePath = resourceFreezer.createFileSubDirPath(resourceFreezer.createFileName(sourceFile))
 
         // Resolve freezed links in Css
-        css = cssUrlReplacer.replace(css, resourceFreezer.resolveFreezedLinks.bind(resourceFreezer, cssFilePath))
+        css = cssUrlReplacer.replace(css, resourceFreezer.resolveFrozenLinks.bind(resourceFreezer, cssFilePath))
 
         destFile = new gutil.File({
             path: cssFilePath,
