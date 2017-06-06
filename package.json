@@ -1,6 +1,6 @@
 {
   "name": "gulp-css-freezer",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "CSS resources freezer. The best use for cache invalidation.",
   "main": "index.js",
   "scripts": {

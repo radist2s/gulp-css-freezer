@@ -9,6 +9,7 @@
 .img-02 {
     background: red url('../img/img-02.jpg');
     background: red url('../img/not-exists.jpg');
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns%22url(not-resolvable-url)3E");
 }
 
 .data-uri-url {
