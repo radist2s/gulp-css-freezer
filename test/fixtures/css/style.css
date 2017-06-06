@@ -8,6 +8,7 @@
 
 .img-02 {
     background: red url('../img/img-02.jpg');
+    background: red url('../img/not-exists.jpg');
 }
 
 .data-uri-url {
