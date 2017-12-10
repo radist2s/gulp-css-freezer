@@ -1,6 +1,6 @@
 var util = require('util')
-var path = require('path')
 var gutil = require('gulp-util')
+var Vinyl = require('vinyl')
 var ResourceFreezer = require('static-resources-freezer')
 var cssUrlReplacer = require('./lib/css-url-replace')
 
@@ -27,9 +27,9 @@ function pipeMainTransform(resourceFreezer, stream, sourceFile) {
         // Resolve freezed links in Css
         css = cssUrlReplacer.replace(css, resourceFreezer.resolveFrozenLinks.bind(resourceFreezer, cssFilePath))
 
-        destFile = new gutil.File({
+        destFile = new Vinyl({
             path: cssFilePath,
-            base: '',
+            base: '.',
             cwd: '',
             contents: new Buffer(css)
         })
