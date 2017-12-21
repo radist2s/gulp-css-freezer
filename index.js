@@ -21,18 +21,22 @@ function pipeMainTransform(resourceFreezer, stream, sourceFile) {
         // Find and freeze resources
         var css = cssUrlReplacer.replace(sourceFile.contents, resourceFreezer.freezeLinks.bind(resourceFreezer, sourceFile, stream), ['//'])
 
-        // Create Css freeze path
-        var cssFilePath = resourceFreezer.createFileSubDirPath(resourceFreezer.createFileName(sourceFile))
-
-        // Resolve freezed links in Css
-        css = cssUrlReplacer.replace(css, resourceFreezer.resolveFrozenLinks.bind(resourceFreezer, cssFilePath))
-
+        // Create dest file with temp content
         destFile = new Vinyl({
-            path: cssFilePath,
+            path: sourceFile.path,
             base: '.',
             cwd: '',
             contents: new Buffer(css)
         })
+        
+        // Create CSS frozen path based on previously frozen content
+        var cssFileFrozenPath = resourceFreezer.createFileSubDirPath(resourceFreezer.createFileName(destFile))
+
+        // Resolve frozen links in Css
+        css = cssUrlReplacer.replace(css, resourceFreezer.resolveFrozenLinks.bind(resourceFreezer, cssFileFrozenPath))
+        
+        destFile.path = cssFileFrozenPath
+        destFile.contents = new Buffer(css)
 
         destFile.sourcePath = sourceFile.path
 
