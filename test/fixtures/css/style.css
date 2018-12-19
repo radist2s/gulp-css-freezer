@@ -1,5 +1,6 @@
 .img-01 {
     background: red url("../img/img-01.jpg") no-repeat center bottom;
+    background: red url("../img/img-01.webp") no-repeat center bottom;
 }
 
 .img-01-clone {
